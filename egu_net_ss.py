@@ -1,12 +1,13 @@
 
 #import library
+import os
 import numpy as np
 import matplotlib.pyplot as plt
 import tensorflow as tf
-import scipy.io as scio 
-import scipy.io as sio
+import scipy.io as spio 
 from tf_utils import random_mini_batches, convert_to_one_hot
 from tensorflow.python.framework import ops
+
 
 def create_placeholders(n_x1, n_x2, n_y):
 
@@ -17,41 +18,42 @@ def create_placeholders(n_x1, n_x2, n_y):
     y = tf.placeholder(tf.float32, [None, n_y], name = "Y") 
     return x_pure, x_mixed, y, isTraining, keep_prob
 
-def initialize_parameters():
-   
-    tf.set_random_seed(1)
 
-    x_w1 = tf.get_variable("x_w1", [1,1,224,256], dtype=tf.float32, initializer=tf.contrib.layers.xavier_initializer_conv2d(seed = 1))
+def initialize_parameters(seed=1):
+   
+    tf.set_random_seed(seed)
+
+    x_w1 = tf.get_variable("x_w1", [1,1,224,256], dtype=tf.float32, initializer=tf.contrib.layers.xavier_initializer_conv2d(seed=seed))
     x_b1 = tf.get_variable("x_b1", [256], initializer = tf.zeros_initializer())
      
-    x_w2 = tf.get_variable("x_w2", [1,1,256,128], dtype=tf.float32, initializer=tf.contrib.layers.xavier_initializer_conv2d(seed = 1))
+    x_w2 = tf.get_variable("x_w2", [1,1,256,128], dtype=tf.float32, initializer=tf.contrib.layers.xavier_initializer_conv2d(seed=seed))
     x_b2 = tf.get_variable("x_b2", [128], initializer = tf.zeros_initializer())   
     
-    x1_conv_w1 = tf.get_variable("x1_conv_w1", [5,5,224,256], dtype=tf.float32, initializer=tf.contrib.layers.xavier_initializer_conv2d(seed = 1))
+    x1_conv_w1 = tf.get_variable("x1_conv_w1", [5,5,224,256], dtype=tf.float32, initializer=tf.contrib.layers.xavier_initializer_conv2d(seed=seed))
     x1_conv_b1 = tf.get_variable("x1_conv_b1", [256], initializer = tf.zeros_initializer())
     
-    x1_conv_w2 = tf.get_variable("x1_conv_w2", [3,3,256,128], dtype=tf.float32, initializer=tf.contrib.layers.xavier_initializer_conv2d(seed = 1))
+    x1_conv_w2 = tf.get_variable("x1_conv_w2", [3,3,256,128], dtype=tf.float32, initializer=tf.contrib.layers.xavier_initializer_conv2d(seed=seed))
     x1_conv_b2 = tf.get_variable("x1_conv_b2", [128], initializer = tf.zeros_initializer()) 
 
-    x_w3 = tf.get_variable("x_w3", [1,1,128,32], dtype=tf.float32, initializer=tf.contrib.layers.xavier_initializer_conv2d(seed = 1))
+    x_w3 = tf.get_variable("x_w3", [1,1,128,32], dtype=tf.float32, initializer=tf.contrib.layers.xavier_initializer_conv2d(seed=seed))
     x_b3 = tf.get_variable("x_b3", [32], initializer = tf.zeros_initializer())
     
-    x1_conv_w4 = tf.get_variable("x1_conv_w4", [1,1,5,32], dtype=tf.float32, initializer=tf.contrib.layers.xavier_initializer_conv2d(seed = 1))
+    x1_conv_w4 = tf.get_variable("x1_conv_w4", [1,1,5,32], dtype=tf.float32, initializer=tf.contrib.layers.xavier_initializer_conv2d(seed=seed))
     x1_conv_b4 = tf.get_variable("x1_conv_b4", [5], initializer = tf.zeros_initializer())
 
-    x_w4 = tf.get_variable("x_w4", [1,1,32,5], dtype=tf.float32, initializer=tf.contrib.layers.xavier_initializer_conv2d(seed = 1))
+    x_w4 = tf.get_variable("x_w4", [1,1,32,5], dtype=tf.float32, initializer=tf.contrib.layers.xavier_initializer_conv2d(seed=seed))
     x_b4 = tf.get_variable("x_b4", [5], initializer = tf.zeros_initializer())
     
-    x_dew1 = tf.get_variable("x_dew1", [1,1,32,5], dtype=tf.float32, initializer=tf.contrib.layers.xavier_initializer_conv2d(seed = 1))
+    x_dew1 = tf.get_variable("x_dew1", [1,1,32,5], dtype=tf.float32, initializer=tf.contrib.layers.xavier_initializer_conv2d(seed=seed))
     x_deb1 = tf.get_variable("x_deb1", [32], initializer = tf.zeros_initializer())
     
-    x_dew2 = tf.get_variable("x_dew2", [1,1,128,32], dtype=tf.float32, initializer=tf.contrib.layers.xavier_initializer_conv2d(seed = 1))
+    x_dew2 = tf.get_variable("x_dew2", [1,1,128,32], dtype=tf.float32, initializer=tf.contrib.layers.xavier_initializer_conv2d(seed=seed))
     x_deb2 = tf.get_variable("x_deb2", [128], initializer = tf.zeros_initializer())
  
-    x_dew3 = tf.get_variable("x_dew3", [3,3,256,128], dtype=tf.float32, initializer=tf.contrib.layers.xavier_initializer_conv2d(seed = 1))
+    x_dew3 = tf.get_variable("x_dew3", [3,3,256,128], dtype=tf.float32, initializer=tf.contrib.layers.xavier_initializer_conv2d(seed=seed))
     x_deb3 = tf.get_variable("x_deb3", [256], initializer = tf.zeros_initializer())
     
-    x_dew4 = tf.get_variable("x_dew4", [5,5,224,256], dtype=tf.float32, initializer=tf.contrib.layers.xavier_initializer_conv2d(seed = 1))
+    x_dew4 = tf.get_variable("x_dew4", [5,5,224,256], dtype=tf.float32, initializer=tf.contrib.layers.xavier_initializer_conv2d(seed=seed))
     x_deb4 = tf.get_variable("x_deb4", [224], initializer = tf.zeros_initializer()) 
     
     parameters = {"x_w1": x_w1,
@@ -80,7 +82,7 @@ def initialize_parameters():
     return parameters
 
     
-def mynetwork(x_pure, x_mixed, parameters, isTraining, keep_prob, momentum = 0.9):
+def mynetwork(x_pure, x_mixed, parameters, isTraining, keep_prob, momentum=0.9):
     
     x_pure_image = tf.reshape(x_pure, [-1, 1, 1, 224], name = "x_pure_image")
     x_mixed_image = tf.reshape(x_mixed, [1, 200, 200, 224], name = "x_mixed_image")
@@ -178,11 +180,11 @@ def mynetwork_optimaization(y_est, y_re, r1, r2, l2_loss, reg, learning_rate, gl
          optimizer = tf.train.AdamOptimizer(learning_rate = learning_rate).minimize(cost,  global_step=global_step)
     return cost, optimizer
 
-def train_mynetwork(x_pure_set, x_mixed_set, x_mixed_set1, y_train, y_test, learning_rate_base = 0.1, beta_reg = 0.005, num_epochs = 200, minibatch_size = 8000, print_cost = True):
+
+def train_mynetwork(x_pure_set, x_mixed_set, x_mixed_set1, y_train, y_test, learning_rate_base=0.1, beta_reg=0.005, num_epochs=200, minibatch_size=8000, print_cost=True, seed=1):
     
     ops.reset_default_graph()                         
-    tf.set_random_seed(1)                           
-    seed = 1                                    
+    tf.set_random_seed(seed)                             
     (m, n_x1) = x_pure_set.shape                        
     (m1, n_x2) = x_mixed_set.shape
     (m, n_y) = y_train.shape                            
@@ -194,7 +196,7 @@ def train_mynetwork(x_pure_set, x_mixed_set, x_mixed_set1, y_train, y_test, lear
     
     x_train_pure, x_train_mixed, y, isTraining, keep_prob = create_placeholders(n_x1, n_x2, n_y) 
 
-    parameters = initialize_parameters()
+    parameters = initialize_parameters(seed)
     
     with tf.name_scope("network"):
          x_pure_layer, x_mixed_layer, x_mixed_de_layer, l2_loss, abundances_pure = mynetwork(x_train_pure, x_train_mixed, parameters, isTraining, keep_prob)
@@ -265,19 +267,21 @@ def train_mynetwork(x_pure_set, x_mixed_set, x_mixed_set1, y_train, y_test, lear
         return parameters , val_acc, abund
 
 
-Pure_TrSet = scio.loadmat('Data/Pure_TrSet.mat')
-Mixed_TrSet = scio.loadmat('Data/Mixed_TrSet.mat')
+if __name__ == '__main__':
+    Pure_TrSet = spio.loadmat('data/tnnls/Pure_TrSet.mat')
+    Mixed_TrSet = spio.loadmat('data/tnnls/Mixed_TrSet.mat')
 
-TrLabel = scio.loadmat('Data/TrLabel.mat')
-TeLabel = scio.loadmat('Data/TeLabel.mat')
+    TrLabel = spio.loadmat('data/tnnls/TrLabel.mat')
+    TeLabel = spio.loadmat('data/tnnls/TeLabel.mat')
 
-Pure_TrSet = Pure_TrSet['Pure_TrSet']
-Mixed_TrSet = Mixed_TrSet['Mixed_TrSet']
-TrLabel = TrLabel['TrLabel']
-TeLabel = TeLabel['TeLabel']
+    Pure_TrSet = Pure_TrSet['Pure_TrSet']
+    Mixed_TrSet = Mixed_TrSet['Mixed_TrSet']
+    TrLabel = TrLabel['TrLabel']
+    TeLabel = TeLabel['TeLabel']
 
-Y_train = TrLabel
-Y_test = TeLabel
+    Y_train = TrLabel
+    Y_test = TeLabel
 
-parameters, val_acc, abund= train_mynetwork(Pure_TrSet, Mixed_TrSet, Mixed_TrSet, Y_train, Y_test)
-sio.savemat('abund.mat', {'abund': abund})
+    parameters, val_acc, abund = train_mynetwork(Pure_TrSet, Mixed_TrSet, Mixed_TrSet, Y_train, Y_test, num_epochs=5)
+    os.makedirs('results', exist_ok=True)
+    spio.savemat('results/abund_ss.mat', {'abund': abund})
